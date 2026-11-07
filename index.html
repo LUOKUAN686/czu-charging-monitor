@@ -3,30 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>微云充 · 智能监控</title>
+    <title>微云日月充 · 智能充电监控系统</title>
     
+    <!-- PWA & 移动端 App 适配 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#F2F5FA">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#090D16">
+
+    <!-- 1. Google Fonts 现代排版字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- 2. Lucide Icons 矢量线性图标插件 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- 3. Canvas-Confetti 粒子物理特效插件 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <!-- 4. ApexCharts 现代微图表与能量环图表引擎插件 -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #F0F4F8 0%, #E8EDF5 50%, #F5F7FA 100%);
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.85);
-            --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.05);
+            /* 统一全端高端暗色拟态调色盘 (Dark Aurora Theme) */
+            --bg-canvas: #090D16;
+            --brand-primary: #10B981;
+            --brand-primary-glow: rgba(16, 185, 129, 0.45);
+            --brand-cyan: #06B6D4;
+            --brand-blue: #3B82F6;
+            --brand-danger: #EF4444;
             
-            --text-primary: #1C1C1E;
-            --text-secondary: #8E8E93;
-            --text-tertiary: #AEAEB2;
+            --glass-card: rgba(15, 23, 42, 0.68);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-highlight: rgba(255, 255, 255, 0.06);
+            --card-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
 
-            --apple-green: #34C759;
-            --apple-green-light: rgba(52, 199, 89, 0.12);
-            --apple-green-glow: rgba(52, 199, 89, 0.28);
-            
-            --apple-gray-busy: #F2F2F7;
-            --apple-gray-txt: #8E8E93;
-            --apple-blue: #007AFF;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --text-dim: #64748B;
+
+            --input-bg: rgba(2, 6, 23, 0.55);
+            --input-border: rgba(255, 255, 255, 0.14);
+            --input-focus: #10B981;
+
+            --radius-card: 30px;
+            --radius-bento: 24px;
+            --radius-slot: 16px;
+            --radius-btn: 18px;
         }
 
         * {
@@ -34,370 +58,1314 @@
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background: var(--bg-gradient);
+            background-color: var(--bg-canvas);
             min-height: 100vh;
-            color: var(--text-primary);
-            padding: calc(env(safe-area-inset-top, 20px) + 12px) 16px calc(env(safe-area-inset-bottom, 20px) + 20px);
-            max-width: 520px;
+            color: var(--text-main);
+            padding: calc(env(safe-area-inset-top, 20px) + 12px) 16px calc(env(safe-area-inset-bottom, 20px) + 24px);
+            max-width: 500px;
             margin: 0 auto;
             position: relative;
             overflow-x: hidden;
         }
 
-        .ambient-glow {
+        /* 统一背景光网格与双色极光微光 */
+        .bg-grid {
             position: fixed;
-            width: 280px;
-            height: 280px;
-            background: radial-gradient(circle, rgba(52, 199, 89, 0.15) 0%, rgba(0, 122, 255, 0.08) 50%, transparent 70%);
-            top: -60px;
-            right: -60px;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 32px 32px;
             z-index: 0;
             pointer-events: none;
-            filter: blur(40px);
+            opacity: 0.6;
         }
 
-        .main-wrapper {
+        .ambient-aurora-top {
+            position: fixed;
+            width: 480px;
+            height: 480px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--brand-primary-glow) 0%, rgba(6, 182, 212, 0.22) 40%, transparent 70%);
+            top: -120px;
+            right: -100px;
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            animation: auroraFloat 12s infinite alternate ease-in-out;
+        }
+
+        .ambient-aurora-bottom {
+            position: fixed;
+            width: 440px;
+            height: 440px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, rgba(16, 185, 129, 0.12) 50%, transparent 75%);
+            bottom: -100px;
+            left: -100px;
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            animation: auroraFloat 14s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes auroraFloat {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.15) translate(-30px, 20px); }
+            100% { transform: scale(0.95) translate(25px, -20px); }
+        }
+
+        /* 页面容器 */
+        .page-view {
             position: relative;
             z-index: 1;
+            width: 100%;
+            display: none;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .page-view.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        header {
+        /* ====================================================
+           1. 登录视图样式 (Dark Aurora 极光暗夜风格)
+           ==================================================== */
+        .login-card {
+            background: var(--glass-card);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--card-shadow);
+            padding: 36px 24px 28px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .brand-icon-wrapper {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+            position: relative;
+        }
+
+        .brand-icon-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-cyan));
+            opacity: 0.25;
+            filter: blur(8px);
+            z-index: -1;
+        }
+
+        .brand-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.6px;
+            background: linear-gradient(135deg, #FFFFFF 30%, #94A3B8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .czu-tag {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60A5FA;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-label {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 18px;
-            padding: 0 4px;
-        }
-        .header-title-box h1 {
-            font-size: 25px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            color: var(--text-primary);
-        }
-        .creator-badge {
-            display: inline-flex;
             align-items: center;
-            gap: 5px;
-            background: rgba(0, 122, 255, 0.08);
-            color: var(--apple-blue);
-            font-size: 11px;
-            font-weight: 600;
-            padding: 3px 9px;
-            border-radius: 12px;
-            margin-bottom: 5px;
-            border: 1px solid rgba(0, 122, 255, 0.15);
-        }
-        .badge-dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: var(--apple-blue);
-        }
-        .refresh-pill {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 7px 14px;
             font-size: 13px;
             font-weight: 600;
-            color: var(--apple-blue);
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.08);
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-btn);
+            padding: 0 16px;
+            transition: all 0.25s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+            background: rgba(2, 6, 23, 0.75);
+        }
+
+        .input-icon {
+            color: var(--text-dim);
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .input-wrapper:focus-within .input-icon {
+            color: var(--brand-primary);
+        }
+
+        .modern-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 15px 0;
+            font-size: 14.5px;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .modern-input::placeholder {
+            color: var(--text-dim);
+            font-weight: 400;
+        }
+
+        .clear-btn {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 6px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-btn:hover {
+            color: var(--text-main);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border: none;
+            outline: none;
+            padding: 16px;
+            border-radius: var(--radius-btn);
+            color: white;
+            font-size: 15.5px;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
-            transition: transform 0.15s ease;
-        }
-        .refresh-pill:active {
-            transform: scale(0.94);
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.45);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
         }
 
-        .hero-metric-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+        .btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary.loading {
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        .btn-spinner {
+            display: none;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .btn-primary.loading .btn-spinner {
+            display: block;
+        }
+        .btn-primary.loading .btn-text,
+        .btn-primary.loading .btn-icon-right {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 预设账号快捷填充小胶囊 */
+        .demo-chip-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .demo-chip-box:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        .demo-chip-box span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .demo-chip-box strong {
+            color: #34D399;
+            font-weight: 600;
+        }
+
+        .auth-error-msg {
+            color: #F87171;
+            font-size: 12.5px;
+            margin-top: 8px;
+            display: none;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        /* 登录页底部版权与免责 */
+        .login-footer {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 11.5px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        /* ====================================================
+           2. 主监控大屏视图样式 (Dashboard Modern)
+           ==================================================== */
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 4px;
+        }
+
+        .brand-zone {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(6, 182, 212, 0.25));
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25);
+            flex-shrink: 0;
+        }
+
+        .brand-meta h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            line-height: 1.2;
+            color: #FFFFFF;
+        }
+
+        .author-tag {
+            font-size: 11px;
+            color: #34D399;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-main);
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.92);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Bento 总结大卡片 */
+        .bento-overview-card {
+            background: var(--glass-card);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 22px;
+            border-radius: var(--radius-bento);
+            padding: 20px 18px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
             margin-bottom: 22px;
-            box-shadow: var(--glass-shadow);
+        }
+
+        .bento-overview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+        }
+
+        .overview-inner {
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-        .metric-info h2 {
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            margin-bottom: 6px;
+
+        .overview-left {
+            flex: 1;
         }
-        .metric-num-wrap {
+
+        .campus-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60A5FA;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .free-count-row {
             display: flex;
             align-items: baseline;
             gap: 6px;
-        }
-        .huge-num {
-            font-size: 42px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            color: var(--apple-green);
-        }
-        .huge-unit {
-            font-size: 16px;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-        .metric-sub {
-            font-size: 12px;
-            color: var(--text-tertiary);
-            margin-top: 4px;
+            margin-bottom: 6px;
         }
 
-        .ring-container {
+        .free-count-number {
+            font-size: 40px;
+            font-weight: 800;
+            color: #10B981;
+            line-height: 1;
+            text-shadow: 0 0 24px rgba(16, 185, 129, 0.4);
+            letter-spacing: -1px;
+        }
+
+        .free-count-total {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        .sub-status-desc {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .overview-chart-box {
+            width: 115px;
+            height: 115px;
             position: relative;
-            width: 76px;
-            height: 76px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .ring-svg {
-            transform: rotate(-90deg);
-        }
-        .ring-circle-bg {
-            fill: none;
-            stroke: #E5E5EA;
-            stroke-width: 7;
-        }
-        .ring-circle-fill {
-            fill: none;
-            stroke: var(--apple-green);
-            stroke-width: 7;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .ring-percent {
-            position: absolute;
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-primary);
+
+        .card-bottom-bar {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11.5px;
+            color: var(--text-dim);
         }
 
-        .section-header {
+        .sync-time-tag {
+            color: #38BDF8;
+            font-weight: 600;
+        }
+
+        /* 设备列表容器 */
+        .section-headline {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
             padding: 0 4px;
         }
-        .section-title {
-            font-size: 15px;
+
+        .section-headline h2 {
+            font-size: 14.5px;
             font-weight: 700;
-            color: var(--text-primary);
-        }
-        .section-tag {
-            font-size: 12px;
-            color: var(--text-secondary);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .device-card {
-            background: var(--glass-bg);
+        .refresh-hint {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .devices-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .device-bento-card {
+            background: var(--glass-card);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 14px;
-            box-shadow: var(--glass-shadow);
+            border-radius: var(--radius-bento);
+            padding: 16px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
         }
-        .device-header {
+
+        .dev-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
-        .dev-title-wrap {
+
+        .dev-left-info {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .dev-name {
-            font-size: 17px;
+
+        .dev-title {
+            font-size: 15px;
             font-weight: 700;
-            color: var(--text-primary);
-        }
-        .dev-badge-no {
-            background: rgba(142, 142, 147, 0.12);
-            color: var(--text-secondary);
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 7px;
-            border-radius: 6px;
-        }
-        .dev-status-badge {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .status-badge-free {
-            background: var(--apple-green-light);
-            color: var(--apple-green);
-        }
-        .status-badge-busy {
-            background: var(--apple-gray-busy);
-            color: var(--apple-gray-txt);
-        }
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-        }
-        .dot-green {
-            background: var(--apple-green);
-            box-shadow: 0 0 6px var(--apple-green);
-        }
-        .dot-gray {
-            background: #C7C7CC;
+            color: #FFFFFF;
         }
 
+        .dev-code-badge {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-dim);
+            font-size: 10.5px;
+            font-family: monospace;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        .badge-has-free {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .badge-full {
+            background: rgba(100, 116, 139, 0.15);
+            color: #94A3B8;
+            border: 1px solid rgba(100, 116, 139, 0.25);
+        }
+
+        .status-dot-inner {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .dot-glow-green {
+            background-color: #10B981;
+            box-shadow: 0 0 8px #10B981;
+        }
+
+        .dot-dim-gray {
+            background-color: #64748B;
+        }
+
+        /* 10 个插孔网格设计 */
         .slots-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
         }
-        .slot-btn {
-            background: var(--apple-gray-busy);
-            border-radius: 14px;
-            padding: 10px 4px;
+
+        .slot-unit {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-slot);
+            padding: 8px 4px;
             text-align: center;
-            border: 1px solid transparent;
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .slot-free {
-            background: #FFFFFF;
-            border-color: rgba(52, 199, 89, 0.45);
-            box-shadow: 0 4px 14px var(--apple-green-glow);
-            cursor: pointer;
-        }
-        .slot-free:active {
-            transform: scale(0.92);
-        }
-        .slot-num {
-            font-size: 16px;
-            font-weight: 700;
-            color: #8E8E93;
-        }
-        .slot-free .slot-num {
-            color: var(--apple-green);
-        }
-        .slot-label {
-            font-size: 11px;
-            margin-top: 2px;
-            font-weight: 600;
-            color: #AEAEB2;
-        }
-        .slot-free .slot-label {
-            color: var(--apple-green);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
         }
 
-        .app-footer {
-            text-align: center;
-            font-size: 11px;
-            color: var(--text-tertiary);
-            margin-top: 24px;
-            padding-bottom: 12px;
-            line-height: 1.6;
+        .slot-unit.slot-free {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.18), rgba(6, 182, 212, 0.08));
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+            cursor: pointer;
         }
-        .app-footer strong {
-            color: var(--text-secondary);
+
+        .slot-unit.slot-free:active {
+            transform: scale(0.92);
+            background: rgba(16, 185, 129, 0.28);
+        }
+
+        .slot-num-text {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+
+        .slot-free .slot-num-text {
+            color: #A7F3D0;
+        }
+
+        .slot-state-label {
+            font-size: 10px;
             font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        .slot-free .slot-state-label {
+            color: #34D399;
+        }
+
+        /* ====================================================
+           3. 方案 1 底部抽屉 (Bottom Sheet HTML5 Dialog)
+           ==================================================== */
+        dialog.bottom-sheet {
+            position: fixed;
+            inset: auto 0 0 0;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            border: none;
+            background: transparent;
+            padding: 0;
+            outline: none;
+            z-index: 9999;
+        }
+
+        dialog.bottom-sheet::backdrop {
+            background: rgba(2, 6, 23, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        dialog.bottom-sheet[open]::backdrop {
+            opacity: 1;
+        }
+
+        .sheet-content {
+            background: #0D1424;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+            border-top-left-radius: 28px;
+            border-top-right-radius: 28px;
+            padding: 16px 20px 32px;
+            box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.8);
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        dialog.bottom-sheet[open] .sheet-content {
+            transform: translateY(0);
+        }
+
+        .sheet-drag-handle {
+            width: 38px;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 auto 18px;
+        }
+
+        .sheet-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .sheet-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sheet-slot-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34D399;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sheet-slot-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        .sheet-slot-subtitle {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .sheet-close-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 方案 1 核心说明卡片：实事求是，杜绝虚假锁定 */
+        .sheet-info-banner {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 18px;
+            padding: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .sheet-info-banner i {
+            color: #10B981;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .sheet-info-text {
+            font-size: 13px;
+            color: #CBD5E1;
+            line-height: 1.5;
+        }
+
+        .sheet-info-text strong {
+            color: #34D399;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .sheet-steps-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+        }
+
+        .sheet-step-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            padding: 6px 0;
+        }
+
+        .sheet-step-badge {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sheet-action-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border: none;
+            padding: 15px;
+            border-radius: 16px;
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+        }
+        .sheet-action-btn:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
 <body>
-    <div class="ambient-glow"></div>
-    <div class="main-wrapper">
-        <header>
-            <div class="header-title-box">
-                <div class="creator-badge">
-                    <span class="badge-dot"></span>
-                    <span>开发者 · 日月潭</span>
-                </div>
-                <h1>常州大学西太湖校区</h1>
-            </div>
-            <button class="refresh-pill" onclick="fetchLiveStatus()">
-                <span id="refresh-icon">🔄</span>
-                <span id="update-time">--:--:--</span>
-            </button>
-        </header>
+    <!-- 极光氛围背景 -->
+    <div class="bg-grid"></div>
+    <div class="ambient-aurora-top"></div>
+    <div class="ambient-aurora-bottom"></div>
 
-        <div class="hero-metric-card">
-            <div class="metric-info">
-                <h2>当前全区可用车位</h2>
-                <div class="metric-num-wrap">
-                    <span class="huge-num" id="free-total">--</span>
-                    <span class="huge-unit">/ <span id="total-slots">40</span> 孔可用</span>
+    <!-- ====================================================
+         1. 邮箱授权验证视图 (Login Page)
+         ==================================================== -->
+    <div id="login-view" class="page-view">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="brand-icon-wrapper">
+                    <i data-lucide="zap" style="color: #10B981; width: 32px; height: 32px;"></i>
                 </div>
-                <div class="metric-sub" id="status-hint">正在拉取最新状态...</div>
+                <h1 class="brand-title">微云日月充</h1>
+                <div class="brand-subtitle">
+                    <span class="czu-tag">常州大学西太湖</span>
+                    <span>·</span>
+                    <span>智能充电监控系统</span>
+                </div>
             </div>
-            <div class="ring-container">
-                <svg class="ring-svg" width="76" height="76">
-                    <circle class="ring-circle-bg" cx="38" cy="38" r="30"></circle>
-                    <circle class="ring-circle-fill" id="ring-fill" cx="38" cy="38" r="30" stroke-dasharray="188.4" stroke-dashoffset="188.4"></circle>
-                </svg>
-                <div class="ring-percent" id="ring-txt">--%</div>
+
+            <form id="auth-form" onsubmit="handleAuthLogin(event)">
+                <!-- 邮箱输入区 -->
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>授权邮箱账号</span>
+                        <span style="font-size: 11px; color: var(--text-dim);">支持校园/常用邮箱</span>
+                    </div>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <i data-lucide="mail" style="width: 19px; height: 19px;"></i>
+                        </div>
+                        <input type="email" id="email-input" class="modern-input" placeholder="例如：czu_student@163.com" required autocomplete="email" oninput="toggleClearBtn()">
+                        <button type="button" id="clear-email-btn" class="clear-btn" onclick="clearEmailInput()">
+                            <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 激活密钥输入区 -->
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>个人授权激活码</span>
+                        <span style="font-size: 11px; color: #34D399;">开发者专属发放</span>
+                    </div>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <i data-lucide="key-round" style="width: 19px; height: 19px;"></i>
+                        </div>
+                        <input type="password" id="key-input" class="modern-input" placeholder="请输入 6 位专属授权密钥" required autocomplete="current-password">
+                        <button type="button" class="clear-btn" style="display: flex;" onclick="togglePwdVisibility()">
+                            <i id="pwd-eye-icon" data-lucide="eye" style="width: 18px; height: 18px;"></i>
+                        </button>
+                    </div>
+                    <div id="error-msg" class="auth-error-msg">
+                        <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i>
+                        <span id="error-text">邮箱或激活密钥不正确</span>
+                    </div>
+                </div>
+
+                <!-- 登录提交按钮 -->
+                <button type="submit" id="login-btn" class="btn-primary">
+                    <span class="btn-spinner"><i data-lucide="loader-2" style="width: 20px; height: 20px;"></i></span>
+                    <span class="btn-text">验证并开启实时监控</span>
+                    <i data-lucide="arrow-right" class="btn-icon-right" style="width: 18px; height: 18px;"></i>
+                </button>
+
+                <!-- 快捷演示凭证胶囊 -->
+                <div class="demo-chip-box" onclick="fillDemoAccount()">
+                    <i data-lucide="sparkles" style="width: 15px; height: 15px; color: #34D399;"></i>
+                    <span>点击一键填入<strong>【演示授权账号】</strong>试用</span>
+                </div>
+            </form>
+
+            <div class="login-footer">
+                <div>⚡ 校园绿色能源物联网专线 · 开发者：<strong>日月潭</strong></div>
+                <div style="margin-top: 4px;">本系统遵循先到先得原则，仅提供孔位空闲探测</div>
             </div>
         </div>
-
-        <div class="section-header">
-            <span class="section-title">机台插孔详情 (0 ~ 9 号)</span>
-            <span class="section-tag">绿灯即为空位，速充</span>
-        </div>
-
-        <div id="devices-container"></div>
-
-        <footer class="app-footer">
-            常州大学西太湖校区 · 微云充智能监控系统 (Android 独立版)<br>
-            Designed & Developed by <strong>日月潭</strong> · 直连官方数据
-        </footer>
     </div>
 
+    <!-- ====================================================
+         2. 主监控仪表大屏视图 (Dashboard Page)
+         ==================================================== -->
+    <div id="dashboard-view" class="page-view">
+        <!-- 顶栏 -->
+        <div class="top-navbar">
+            <div class="brand-zone">
+                <div class="brand-avatar">
+                    <i data-lucide="zap" style="color: #10B981; width: 22px; height: 22px;"></i>
+                </div>
+                <div class="brand-meta">
+                    <h1>微云日月充</h1>
+                    <div class="author-tag">
+                        <i data-lucide="sparkles" style="width: 12px; height: 12px;"></i>
+                        <span>开发者 · 日月潭</span>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <button class="icon-btn" onclick="fetchLiveStatus()" title="即时刷新状态">
+                    <i id="refresh-icon" data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i>
+                </button>
+                <button class="icon-btn" onclick="handleLogout()" title="退出授权并切换账号">
+                    <i data-lucide="log-out" style="width: 18px; height: 18px; color: #94A3B8;"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 核心 Bento 聚合摘要卡片 -->
+        <div class="bento-overview-card">
+            <div class="overview-inner">
+                <div class="overview-left">
+                    <div class="campus-pill">
+                        <i data-lucide="map-pin" style="width: 12px; height: 12px;"></i>
+                        <span>常州大学西太湖校区</span>
+                    </div>
+                    <div class="free-count-row">
+                        <span id="free-count-val" class="free-count-number">--</span>
+                        <span class="free-count-total">/ 40 个可用插孔</span>
+                    </div>
+                    <div id="status-hint-text" class="sub-status-desc">
+                        <i data-lucide="check-circle-2" style="width: 14px; height: 14px; color: #10B981;"></i>
+                        <span>正在探查全区 4 台设备...</span>
+                    </div>
+                </div>
+                <!-- ApexCharts 极光能量环 -->
+                <div class="overview-chart-box">
+                    <div id="gauge-radial-chart"></div>
+                </div>
+            </div>
+            <div class="card-bottom-bar">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <i data-lucide="activity" style="width: 12px; height: 12px; color: #10B981;"></i>
+                    <span>已授权：<span id="current-user-tag" style="color: #E2E8F0;">--</span></span>
+                </div>
+                <div>更新于 <span id="sync-time-val" class="sync-time-tag">--:--:--</span></div>
+            </div>
+        </div>
+
+        <!-- 设备监控卡片列表 -->
+        <div class="section-headline">
+            <h2>
+                <i data-lucide="server" style="width: 16px; height: 16px; color: #38BDF8;"></i>
+                <span>实时机位与孔位状态</span>
+            </h2>
+            <span class="refresh-hint">20秒全自动刷新</span>
+        </div>
+
+        <div id="devices-container" class="devices-stack">
+            <!-- 动态渲染 4 台设备 -->
+        </div>
+
+        <!-- 页脚署名 -->
+        <div style="text-align: center; margin-top: 26px; font-size: 11px; color: var(--text-dim); line-height: 1.6;">
+            常州大学西太湖校区微云充监控终端 · v2.0 极光版<br>
+            Made with ❤️ by <strong>日月潭</strong>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         3. 方案 1 底部指引抽屉 (Bottom Sheet)
+         ==================================================== -->
+    <dialog id="slotSheet" class="bottom-sheet" onclick="handleBackdropClick(event)">
+        <div class="sheet-content">
+            <div class="sheet-drag-handle"></div>
+            
+            <div class="sheet-head">
+                <div class="sheet-title-group">
+                    <div class="sheet-slot-icon">
+                        <i data-lucide="plug-zap" style="width: 20px; height: 20px;"></i>
+                    </div>
+                    <div>
+                        <div id="sheetDevName" class="sheet-slot-title">--号机 · --号插孔</div>
+                        <div class="sheet-slot-subtitle">常州大学西太湖校区集中充电站</div>
+                    </div>
+                </div>
+                <button class="sheet-close-btn" onclick="closeSheet()">
+                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+
+            <!-- 方案 1：真诚明确说明，绝不误导锁孔 -->
+            <div class="sheet-info-banner">
+                <i data-lucide="info" style="width: 20px; height: 20px;"></i>
+                <div class="sheet-info-text">
+                    <strong>【公共插孔 · 先到先得原则】</strong>
+                    该孔位当前处于<strong>空闲可用</strong>状态。请注意：公共充电桩无法被软件远程锁止，他人现场插枪亦可使用，建议您尽早前往。
+                </div>
+            </div>
+
+            <div class="sheet-steps-box">
+                <div class="sheet-step-item">
+                    <div class="sheet-step-badge">1</div>
+                    <span>建议携带随车充电器在 <strong>5 分钟内</strong> 前往现场</span>
+                </div>
+                <div class="sheet-step-item">
+                    <div class="sheet-step-badge">2</div>
+                    <span>对准对应机器的指定插孔连接充电插头</span>
+                </div>
+                <div class="sheet-step-item">
+                    <div class="sheet-step-badge">3</div>
+                    <span>使用微信扫描设备机身二维码即可开始极速充电</span>
+                </div>
+            </div>
+
+            <button class="sheet-action-btn" onclick="confirmGo()">
+                <i data-lucide="check" style="width: 18px; height: 18px;"></i>
+                <span>我知道了，这就带充电器出发</span>
+            </button>
+        </div>
+    </dialog>
+
     <script>
-        const API_URL = "https://saas.laichon.com/api/app/ebike/getDeviceInfo";
-        const HEADERS = {
+        // ==========================================
+        // 1. 认证配置与白名单管理 (路线 A)
+        // ==========================================
+        const AUTH_STORAGE_KEY = "czu_charge_auth_user";
+        
+        // 授权白名单字典：邮箱 -> 激活密钥 (支持学生、测试和开发者账号)
+        const AUTHORIZED_USERS = {
+            "admin@czu.edu.cn": "888888",
+            "riyue@czu.edu.cn": "888888",
+            "student@czu.edu.cn": "123456",
+            "demo@czu.edu.cn": "888888"
+        };
+        // 通用备用激活码（允许任何 @czu.edu.cn 或合法邮箱配合统一激活密钥使用）
+        const UNIVERSAL_KEY = "888888";
+
+        // ==========================================
+        // 2. 充电设备与微云充微信请求配置
+        // ==========================================
+        const WYC_API = "https://saas.laichon.com/api/app/ebike/getDeviceInfo";
+        const WYC_HEADERS = {
             "openid": "oOO3c4op_7fkh8C4-q0mFnbn-uIQ",
             "authorization": "bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvbW9iaWxlLmxhaWNob24uY29tIiwiaWF0IjoxNzk0MDgxMDE4LCJleHAiOjE3OTUzNzcwMTgsInN1YiI6MzI4ODk1NzEsInJvbGUiOiJ1c2VyIiwibW9uaXRvcl91c2VyX2lkIjoiN2YyZjM4YTViMzJkNzIwNGRhMzM4YzI0MzEyMDNmZjciLCJqdGkiOjk3Nzc4MDQyMDk0NDMxODQ2NSwibmJmIjoxNzk0MDgxMDE4fQ==.EhEjWeppWqmxxwGpEg2UAlOF-kNgwCe1V8Q89TUIoME=",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090a13) UnifiedPCWindowsWechat(0xf254200d) XWEB/26073",
+            "xweb_xhr": "1",
             "service-code": "WYC-MI-WEIXIN",
-            "content-type": "application/json"
+            "content-type": "application/json",
+            "accept": "*/*"
         };
 
-        const devices = [
-            {"name": "1号机", "device_no": "L32022884"},
-            {"name": "2号机", "device_no": "L32022881"},
-            {"name": "3号机", "device_no": "L32022883"},
-            {"name": "4号机", "device_no": "L32022882"}
+        const DEVICES = [
+            { name: "1号机", device_no: "L32022884" },
+            { name: "2号机", device_no: "L32022881" },
+            { name: "3号机", device_no: "L32022883" },
+            { name: "4号机", device_no: "L32022882" }
         ];
 
-        let isRefreshing = false;
+        let apexChart = null;
+        let isFetching = false;
+        let refreshTimer = null;
 
+        // ==========================================
+        // 3. 页面路由与视图切换
+        // ==========================================
+        function initApp() {
+            lucide.createIcons();
+            const authedUser = localStorage.getItem(AUTH_STORAGE_KEY);
+            if (authedUser) {
+                showDashboard(authedUser);
+            } else {
+                showLogin();
+            }
+        }
+
+        function showLogin() {
+            if (refreshTimer) clearInterval(refreshTimer);
+            document.getElementById("dashboard-view").classList.remove("active");
+            const loginEl = document.getElementById("login-view");
+            loginEl.classList.add("active");
+            lucide.createIcons();
+        }
+
+        function showDashboard(userEmail) {
+            document.getElementById("login-view").classList.remove("active");
+            const dashEl = document.getElementById("dashboard-view");
+            dashEl.classList.add("active");
+            document.getElementById("current-user-tag").innerText = userEmail.split("@")[0];
+            
+            initRadialChart();
+            lucide.createIcons();
+            
+            // 立即拉取并开启周期轮询
+            fetchLiveStatus();
+            if (refreshTimer) clearInterval(refreshTimer);
+            refreshTimer = setInterval(fetchLiveStatus, 20000);
+        }
+
+        // ==========================================
+        // 4. 登录验证交互与礼花庆祝 (路线 A)
+        // ==========================================
+        function handleAuthLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById("email-input").value.trim().toLowerCase();
+            const key = document.getElementById("key-input").value.trim();
+            const btn = document.getElementById("login-btn");
+            const errBox = document.getElementById("error-msg");
+            const errText = document.getElementById("error-text");
+
+            errBox.style.display = "none";
+            btn.classList.add("loading");
+
+            setTimeout(() => {
+                let isValid = false;
+                if (AUTHORIZED_USERS[email] && AUTHORIZED_USERS[email] === key) {
+                    isValid = true;
+                } else if (key === UNIVERSAL_KEY && email.includes("@")) {
+                    // 支持通用授权密钥验证
+                    isValid = true;
+                }
+
+                if (isValid) {
+                    // 1. 触发粒子物理喷射
+                    triggerSuccessConfetti();
+                    // 2. 存储登录状态
+                    localStorage.setItem(AUTH_STORAGE_KEY, email);
+                    // 3. 平滑切换
+                    setTimeout(() => {
+                        btn.classList.remove("loading");
+                        showDashboard(email);
+                    }, 800);
+                } else {
+                    btn.classList.remove("loading");
+                    errText.innerText = "授权未通过：邮箱未在白名单或激活码错误";
+                    errBox.style.display = "flex";
+                    if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+                }
+            }, 600);
+        }
+
+        function triggerSuccessConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.65 },
+                    colors: ['#10B981', '#06B6D4', '#3B82F6', '#FFFFFF']
+                });
+            }
+        }
+
+        function fillDemoAccount() {
+            document.getElementById("email-input").value = "student@czu.edu.cn";
+            document.getElementById("key-input").value = "123456";
+            toggleClearBtn();
+            document.getElementById("error-msg").style.display = "none";
+            if (navigator.vibrate) navigator.vibrate(20);
+        }
+
+        function toggleClearBtn() {
+            const val = document.getElementById("email-input").value;
+            const btn = document.getElementById("clear-email-btn");
+            btn.style.display = val ? "flex" : "none";
+        }
+
+        function clearEmailInput() {
+            const input = document.getElementById("email-input");
+            input.value = "";
+            toggleClearBtn();
+            input.focus();
+        }
+
+        function togglePwdVisibility() {
+            const input = document.getElementById("key-input");
+            const isPwd = input.type === "password";
+            input.type = isPwd ? "text" : "password";
+            const icon = document.getElementById("pwd-eye-icon");
+            icon.setAttribute("data-lucide", isPwd ? "eye-off" : "eye");
+            lucide.createIcons();
+        }
+
+        function handleLogout() {
+            if (confirm("确定要退出本次授权并返回登录界面吗？")) {
+                localStorage.removeItem(AUTH_STORAGE_KEY);
+                showLogin();
+            }
+        }
+
+        // ==========================================
+        // 5. ApexCharts 能量环图表引擎
+        // ==========================================
+        function initRadialChart() {
+            if (apexChart) return;
+            const options = {
+                series: [0],
+                chart: {
+                    height: 140,
+                    width: 140,
+                    type: 'radialBar',
+                    sparkline: { enabled: true }
+                },
+                plotOptions: {
+                    radialBar: {
+                        startAngle: -125,
+                        endAngle: 125,
+                        hollow: {
+                            margin: 0,
+                            size: '64%',
+                            background: 'transparent'
+                        },
+                        track: {
+                            background: 'rgba(255, 255, 255, 0.08)',
+                            strokeWidth: '100%',
+                            margin: 0
+                        },
+                        dataLabels: {
+                            show: true,
+                            name: {
+                                show: true,
+                                fontSize: '10px',
+                                fontWeight: 600,
+                                color: '#94A3B8',
+                                offsetY: -4
+                            },
+                            value: {
+                                offsetY: 4,
+                                fontSize: '16px',
+                                fontWeight: 800,
+                                color: '#FFFFFF',
+                                formatter: function (val) {
+                                    return val + "%";
+                                }
+                            }
+                        }
+                    }
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shade: 'dark',
+                        type: 'horizontal',
+                        shadeIntensity: 0.5,
+                        gradientToColors: ['#06B6D4'],
+                        inverseColors: true,
+                        opacityFrom: 1,
+                        opacityTo: 1,
+                        stops: [0, 100],
+                        colorStops: [
+                            { offset: 0, color: '#10B981', opacity: 1 },
+                            { offset: 100, color: '#06B6D4', opacity: 1 }
+                        ]
+                    }
+                },
+                stroke: { lineCap: 'round' },
+                labels: ['可用率']
+            };
+
+            apexChart = new ApexCharts(document.querySelector("#gauge-radial-chart"), options);
+            apexChart.render();
+        }
+
+        // ==========================================
+        // 6. 微云充状态探测核心业务 (支持云端 / 本地直连)
+        // ==========================================
         async function fetchSingleDevice(dev) {
             try {
-                const resp = await fetch(API_URL, {
+                const resp = await fetch(WYC_API, {
                     method: "POST",
-                    headers: HEADERS,
-                    body: JSON.stringify({"device_no": dev.device_no})
+                    headers: WYC_HEADERS,
+                    body: JSON.stringify({ "device_no": dev.device_no })
                 });
                 const res = await resp.json();
                 const guns = (res.data && res.data.device_gunpoint) ? res.data.device_gunpoint : [];
@@ -409,115 +1377,175 @@
                 return {
                     name: dev.name,
                     device_no: dev.device_no,
-                    total: guns_status.length,
+                    total: guns_status.length || 10,
                     free: freeCount,
                     guns: guns_status
                 };
             } catch (e) {
-                return {
-                    name: dev.name,
-                    device_no: dev.device_no,
-                    total: 10,
-                    free: 0,
-                    guns: []
-                };
+                // 若出现网络问题（例如在某些浏览器存在跨域，自动降级为向本地云服务 /api/status 探测）
+                return null;
             }
         }
 
         async function fetchLiveStatus() {
-            if (isRefreshing) return;
-            isRefreshing = true;
+            if (isFetching) return;
+            isFetching = true;
+
             const icon = document.getElementById("refresh-icon");
-            icon.style.transition = "transform 0.6s ease";
-            icon.style.transform = "rotate(360deg)";
+            if (icon) {
+                icon.style.transition = "transform 0.6s ease";
+                icon.style.transform = "rotate(360deg)";
+            }
 
             const now = new Date();
-            const timeStr = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2, '0')).join(':');
+            const timeStr = [now.getHours(), now.getMinutes(), now.getSeconds()]
+                .map(n => String(n).padStart(2, '0')).join(':');
 
             try {
-                const results = await Promise.all(devices.map(d => fetchSingleDevice(d)));
-                let totalAll = 0;
-                let freeAll = 0;
-                results.forEach(r => {
-                    totalAll += r.total;
-                    freeAll += r.free;
-                });
-
-                document.getElementById("update-time").innerText = timeStr;
-                document.getElementById("free-total").innerText = freeAll;
-                document.getElementById("total-slots").innerText = totalAll;
-
-                const hintElem = document.getElementById("status-hint");
-                if (freeAll > 0) {
-                    hintElem.innerHTML = `🟢 发现 <strong>${freeAll}</strong> 个空位，可直接带充电器前往`;
-                    hintElem.style.color = "var(--apple-green)";
-                } else {
-                    hintElem.innerHTML = `🈵 全区插孔已占满，建议稍后刷新捡漏`;
-                    hintElem.style.color = "var(--apple-gray-txt)";
+                let results = await Promise.all(DEVICES.map(d => fetchSingleDevice(d)));
+                
+                // 如果直连失败（例如跨域限制），尝试读取同源的云端代理 /api/status
+                if (results.some(r => r === null)) {
+                    try {
+                        const fallbackResp = await fetch("/api/status");
+                        if (fallbackResp.ok) {
+                            const cloudData = await fallbackResp.json();
+                            results = cloudData.devices.map(d => ({
+                                name: d.name,
+                                device_no: d.device_no,
+                                total: d.total,
+                                free: d.free,
+                                guns: d.guns.map(g => ({ gun_no: g.gun_no, is_free: g.is_free }))
+                            }));
+                        }
+                    } catch (err) {
+                        console.warn("云端代理获取失败，使用已获取的非空结果", err);
+                    }
                 }
 
-                const freeRate = totalAll > 0 ? (freeAll / totalAll) : 0;
-                const circumference = 2 * Math.PI * 30;
-                const offset = circumference - (freeRate * circumference);
-                document.getElementById("ring-fill").style.strokeDashoffset = offset;
-                document.getElementById("ring-txt").innerText = Math.round(freeRate * 100) + "%";
-
-                const container = document.getElementById("devices-container");
-                container.innerHTML = "";
-
-                results.forEach(dev => {
-                    const isFree = dev.free > 0;
-                    const card = document.createElement("div");
-                    card.className = "device-card";
-
-                    let slotsHtml = "";
-                    dev.guns.forEach(g => {
-                        if (g.is_free) {
-                            slotsHtml += `
-                                <div class="slot-btn slot-free" onclick="alert('已为你锁定：${dev.name} 的【${g.gun_no}号孔】为空闲状态！')">
-                                    <div class="slot-num">${g.gun_no}号</div>
-                                    <div class="slot-label">空闲</div>
-                                </div>
-                            `;
-                        } else {
-                            slotsHtml += `
-                                <div class="slot-btn">
-                                    <div class="slot-num">${g.gun_no}号</div>
-                                    <div class="slot-label">占用</div>
-                                </div>
-                            `;
-                        }
-                    });
-
-                    card.innerHTML = `
-                        <div class="device-header">
-                            <div class="dev-title-wrap">
-                                <span class="dev-name">${dev.name}</span>
-                                <span class="dev-badge-no">${dev.device_no}</span>
-                            </div>
-                            <div class="dev-status-badge ${isFree ? 'status-badge-free' : 'status-badge-busy'}">
-                                <span class="status-dot ${isFree ? 'dot-green' : 'dot-gray'}"></span>
-                                <span>${isFree ? `空闲 ${dev.free} 个孔` : '满载充电'}</span>
-                            </div>
-                        </div>
-                        <div class="slots-grid">
-                            ${slotsHtml}
-                        </div>
-                    `;
-                    container.appendChild(card);
+                // 过滤有效数据，保底处理
+                const validResults = results.map((r, idx) => r || {
+                    name: DEVICES[idx].name,
+                    device_no: DEVICES[idx].device_no,
+                    total: 10,
+                    free: 0,
+                    guns: Array.from({length: 10}, (_, i) => ({ gun_no: i, is_free: false }))
                 });
 
-                if (navigator.vibrate) navigator.vibrate(25);
+                let totalSlots = 0;
+                let freeSlots = 0;
+                validResults.forEach(r => {
+                    totalSlots += r.total;
+                    freeSlots += r.free;
+                });
+
+                // 更新界面指标
+                document.getElementById("free-count-val").innerText = freeSlots;
+                document.getElementById("sync-time-val").innerText = timeStr;
+
+                const hintEl = document.getElementById("status-hint-text");
+                if (freeSlots > 0) {
+                    hintEl.innerHTML = `<i data-lucide="check-circle-2" style="width: 14px; height: 14px; color: #10B981;"></i><span>当前余量充足，推荐携带充电器前往</span>`;
+                } else {
+                    hintEl.innerHTML = `<i data-lucide="clock" style="width: 14px; height: 14px; color: #F59E0B;"></i><span>暂无空闲孔位，建议稍后刷新捡漏</span>`;
+                }
+
+                // 更新 ApexCharts 能量环
+                const freeRate = totalSlots > 0 ? Math.round((freeSlots / totalSlots) * 100) : 0;
+                if (apexChart) {
+                    apexChart.updateSeries([freeRate]);
+                }
+
+                // 渲染设备卡片
+                renderDeviceCards(validResults);
+                lucide.createIcons();
+
+            } catch (err) {
+                console.error("刷新失败", err);
             } finally {
                 setTimeout(() => {
-                    icon.style.transform = "rotate(0deg)";
-                    isRefreshing = false;
+                    if (icon) icon.style.transform = "rotate(0deg)";
+                    isFetching = false;
                 }, 600);
             }
         }
 
-        fetchLiveStatus();
-        setInterval(fetchLiveStatus, 20000);
+        function renderDeviceCards(devList) {
+            const container = document.getElementById("devices-container");
+            container.innerHTML = "";
+
+            devList.forEach(dev => {
+                const isHasFree = dev.free > 0;
+                const card = document.createElement("div");
+                card.className = "device-bento-card";
+
+                let slotsHtml = "";
+                dev.guns.forEach(g => {
+                    if (g.is_free) {
+                        slotsHtml += `
+                            <div class="slot-unit slot-free" onclick="openSlotSheet('${dev.name}', ${g.gun_no})">
+                                <div class="slot-num-text">${g.gun_no}号</div>
+                                <div class="slot-state-label">空闲</div>
+                            </div>
+                        `;
+                    } else {
+                        slotsHtml += `
+                            <div class="slot-unit">
+                                <div class="slot-num-text">${g.gun_no}号</div>
+                                <div class="slot-state-label">占用</div>
+                            </div>
+                        `;
+                    }
+                });
+
+                card.innerHTML = `
+                    <div class="dev-header">
+                        <div class="dev-left-info">
+                            <span class="dev-title">${dev.name}</span>
+                            <span class="dev-code-badge">${dev.device_no}</span>
+                        </div>
+                        <div class="status-badge ${isHasFree ? 'badge-has-free' : 'badge-full'}">
+                            <span class="status-dot-inner ${isHasFree ? 'dot-glow-green' : 'dot-dim-gray'}"></span>
+                            <span>${isHasFree ? `空闲 ${dev.free} 个孔` : '全部占满'}</span>
+                        </div>
+                    </div>
+                    <div class="slots-grid">
+                        ${slotsHtml}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // 7. 方案 1 底部指引抽屉交互
+        // ==========================================
+        const sheetDialog = document.getElementById("slotSheet");
+
+        function openSlotSheet(devName, slotNo) {
+            document.getElementById("sheetDevName").innerText = `${devName} · ${slotNo}号插孔`;
+            sheetDialog.showModal();
+            lucide.createIcons();
+            if (navigator.vibrate) navigator.vibrate(20);
+        }
+
+        function closeSheet() {
+            sheetDialog.close();
+        }
+
+        function confirmGo() {
+            sheetDialog.close();
+            if (navigator.vibrate) navigator.vibrate([20, 50]);
+        }
+
+        function handleBackdropClick(e) {
+            if (e.target === sheetDialog) {
+                sheetDialog.close();
+            }
+        }
+
+        // 启动主入口
+        window.addEventListener("DOMContentLoaded", initApp);
     </script>
 </body>
 </html>

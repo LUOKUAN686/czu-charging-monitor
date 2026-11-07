@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>微云日月充 · 现代前沿登录界面设计</title>
+    
+    <!-- 引入前沿现代轻量设计插件 -->
+    <!-- 1. Google Fonts 现代排版字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- 2. Lucide Icons 矢量图标库 (现代化纯净设计) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- 3. Canvas-Confetti 粒子庆祝物理引擎插件 (验证成功时华丽喷射) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            /* 现代高级配色令牌 (Design Tokens) */
+            --bg-canvas: #090D16;
+            --brand-primary: #10B981;
+            --brand-primary-glow: rgba(16, 185, 129, 0.45);
+            --brand-cyan: #06B6D4;
+            --brand-blue: #3B82F6;
+            
+            --glass-card: rgba(15, 23, 42, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-highlight: rgba(255, 255, 255, 0.06);
+            --card-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --text-dim: #64748B;
+
+            --input-bg: rgba(2, 6, 23, 0.55);
+            --input-border: rgba(255, 255, 255, 0.14);
+            --input-focus: #10B981;
+
+            --radius-card: 32px;
+            --radius-input: 18px;
+            --radius-btn: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            min-height: 100vh;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 动态背景光网格与光晕 (Mesh Gradient & Glow) */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 32px 32px;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .ambient-aurora {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--brand-primary-glow) 0%, rgba(6, 182, 212, 0.25) 40%, transparent 70%);
+            top: -120px;
+            right: -100px;
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            animation: auroraFloat 12s infinite alternate ease-in-out;
+        }
+
+        .ambient-blue-glow {
+            position: fixed;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.28) 0%, rgba(16, 185, 129, 0.15) 50%, transparent 75%);
+            bottom: -100px;
+            left: -100px;
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            animation: auroraFloat 14s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes auroraFloat {
+            0% { transform: translate(0, 0) scale(0.9); }
+            50% { transform: translate(30px, -20px) scale(1.1); }
+            100% { transform: translate(-20px, 20px) scale(1.0); }
+        }
+
+        .login-shell {
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 顶部开发者微章 (Bento Pill) */
+        .dev-badge-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .dev-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 9999px;
+            padding: 6px 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--brand-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--brand-primary);
+            animation: dotBlink 2s infinite ease-in-out;
+        }
+        @keyframes dotBlink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+        .dev-text {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: 0.3px;
+        }
+        .dev-author {
+            color: var(--brand-primary);
+            font-weight: 700;
+        }
+
+        /* 核心拟态毛玻璃容器 (Glassmorphism Bento Box) */
+        .glass-box {
+            background: var(--glass-card);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: var(--radius-card);
+            padding: 36px 30px 32px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 顶部高光折射线 */
+        .glass-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        }
+
+        /* 头部 Brand */
+        .header-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo-frame {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 16px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.35);
+            position: relative;
+        }
+        .logo-frame i {
+            color: var(--brand-primary);
+            width: 34px;
+            height: 34px;
+            filter: drop-shadow(0 0 10px var(--brand-primary));
+        }
+
+        .title-main {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #FFFFFF 30%, #94A3B8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .title-sub {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+
+        /* 表单控件 */
+        .form-unit {
+            margin-bottom: 20px;
+        }
+        .unit-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            padding-left: 2px;
+        }
+        .input-shell {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .icon-box {
+            position: absolute;
+            left: 16px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            transition: color 0.25s ease;
+        }
+        .input-box {
+            width: 100%;
+            height: 52px;
+            background: var(--input-bg);
+            border: 1.5px solid var(--input-border);
+            border-radius: var(--radius-input);
+            padding: 0 16px 0 46px;
+            font-size: 14.5px;
+            font-weight: 500;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .input-box:focus {
+            background: rgba(2, 6, 23, 0.85);
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 4px var(--brand-primary-glow);
+        }
+        .input-box:focus + .icon-box,
+        .input-shell:focus-within .icon-box {
+            color: var(--brand-primary);
+        }
+        .input-box::placeholder {
+            color: #475569;
+            font-size: 13px;
+        }
+
+        /* 记住与辅助条 */
+        .assist-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 26px;
+            padding: 0 2px;
+        }
+        .switch-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+            user-select: none;
+        }
+        .custom-toggle {
+            position: relative;
+            width: 36px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 9999px;
+            transition: background 0.25s;
+        }
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .active-toggle {
+            background: var(--brand-primary);
+        }
+        .active-toggle .toggle-knob {
+            transform: translateX(16px);
+        }
+        .link-text {
+            font-size: 13px;
+            color: var(--brand-primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: opacity 0.2s;
+        }
+        .link-text:hover {
+            opacity: 0.85;
+        }
+
+        /* 主登录按钮 (Aurora Glow Action) */
+        .action-btn {
+            width: 100%;
+            height: 52px;
+            border: none;
+            border-radius: var(--radius-btn);
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            box-shadow: 0 10px 28px -5px rgba(16, 185, 129, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 34px -5px rgba(16, 185, 129, 0.65);
+        }
+        .action-btn:active {
+            transform: scale(0.97);
+        }
+        .action-btn i {
+            transition: transform 0.2s ease;
+        }
+        .action-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* 状态与 Toast */
+        .toast-info {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 13px;
+            min-height: 20px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        /* 底部保障条 */
+        .footer-note {
+            text-align: center;
+            margin-top: 26px;
+            font-size: 12px;
+            color: var(--text-dim);
+            line-height: 1.7;
+        }
+        .footer-note span {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="ambient-aurora"></div>
+    <div class="ambient-blue-glow"></div>
+
+    <div class="login-shell">
+        <!-- 开发者状态栏 -->
+        <div class="dev-badge-bar">
+            <div class="dev-pill">
+                <span class="pulse-dot"></span>
+                <span class="dev-text">常州大学西太湖校区 · 开发者 <span class="dev-author">日月潭</span></span>
+            </div>
+        </div>
+
+        <!-- 核心毛玻璃卡片 -->
+        <div class="glass-box">
+            <div class="header-section">
+                <div class="logo-frame">
+                    <i data-lucide="zap"></i>
+                </div>
+                <h1 class="title-main">微云日月充</h1>
+                <p class="title-sub">智能充电监控系统 · 专属授权认证</p>
+            </div>
+
+            <form onsubmit="doPreviewLogin(event)" autocomplete="on">
+                <div class="form-unit">
+                    <label class="unit-label" for="user-email">
+                        <span>授权电子邮箱</span>
+                        <span style="font-size: 11px; color: var(--text-dim);">校园邮箱 / 常用邮箱</span>
+                    </label>
+                    <div class="input-shell">
+                        <div class="icon-box"><i data-lucide="mail"></i></div>
+                        <input type="email" id="user-email" class="input-box" placeholder="输入邮箱 (如 student@czu.edu.cn)" value="student@czu.edu.cn" required autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="form-unit">
+                    <label class="unit-label" for="user-key">
+                        <span>专属授权激活密钥</span>
+                        <span style="font-size: 11px; color: var(--text-dim);">开发者分配</span>
+                    </label>
+                    <div class="input-shell">
+                        <div class="icon-box"><i data-lucide="key-round"></i></div>
+                        <input type="text" id="user-key" class="input-box" placeholder="输入开发者分配的激活密钥" value="RYT-8888" required autocomplete="one-time-code">
+                    </div>
+                </div>
+
+                <div class="assist-bar">
+                    <div class="switch-wrap" onclick="toggleRemember()">
+                        <div class="custom-toggle active-toggle" id="toggleSwitch">
+                            <div class="toggle-knob"></div>
+                        </div>
+                        <span>记住本次授权 (永久免密)</span>
+                    </div>
+                    <a href="javascript:void(0)" class="link-text" onclick="showContactModal()">
+                        <span>申请密钥</span>
+                        <i data-lucide="arrow-up-right" style="width: 14px; height: 14px;"></i>
+                    </a>
+                </div>
+
+                <button type="submit" class="action-btn" id="submitBtn">
+                    <span id="btnText">验证并接入实时监控大屏</span>
+                    <i data-lucide="arrow-right" id="btnArrow"></i>
+                </button>
+
+                <div class="toast-info" id="toastMsg"></div>
+            </form>
+        </div>
+
+        <div class="footer-note">
+            基于端对端白名单授权保护 · Cloud Run 驱动<br>
+            Designed & Developed by <span>日月潭</span>
+        </div>
+    </div>
+
+    <script>
+        // 初始化 Lucide 图标插件
+        lucide.createIcons();
+
+        let rememberMe = true;
+        function toggleRemember() {
+            rememberMe = !rememberMe;
+            const toggle = document.getElementById("toggleSwitch");
+            if (rememberMe) {
+                toggle.classList.add("active-toggle");
+            } else {
+                toggle.classList.remove("active-toggle");
+            }
+        }
+
+        function showContactModal() {
+            alert("请联系开发者【日月潭】获取您的专属邮箱白名单与授权密钥！");
+        }
+
+        function doPreviewLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById("submitBtn");
+            const btnText = document.getElementById("btnText");
+            const toast = document.getElementById("toastMsg");
+            const passcode = document.getElementById("user-key").value.trim();
+
+            btnText.innerText = "正在接入云端白名单校验...";
+            btn.style.opacity = "0.85";
+            toast.innerText = "";
+
+            setTimeout(() => {
+                if (passcode.toUpperCase() === "RYT-8888" || passcode === "666888") {
+                    btnText.innerText = "✓ 授权认证成功！";
+                    btn.style.background = "linear-gradient(135deg, #10B981 0%, #059669 100%)";
+                    toast.style.color = "var(--brand-primary)";
+                    toast.innerText = "已通过开发者白名单校验，正在开启大屏...";
+
+                    // 触发 Canvas-Confetti 粒子庆祝物理特效插件
+                    confetti({
+                        particleCount: 80,
+                        spread: 70,
+                        origin: { y: 0.65 },
+                        colors: ['#10B981', '#06B6D4', '#3B82F6', '#FFFFFF']
+                    });
+
+                    setTimeout(() => {
+                        alert("🎉 恭喜！样品体验完全成功！\n正式版验证通过后，将直接平滑滑入实时 40 个插孔充电大屏！");
+                        btnText.innerText = "验证并接入实时监控大屏";
+                        btn.style.opacity = "1";
+                    }, 1000);
+                } else {
+                    btnText.innerText = "验证并接入实时监控大屏";
+                    btn.style.opacity = "1";
+                    toast.style.color = "#EF4444";
+                    toast.innerText = "❌ 邮箱未授权或激活密钥错误，请联系开发者获取";
+                }
+            }, 600);
+        }
+    </script>
+</body>
+</html>

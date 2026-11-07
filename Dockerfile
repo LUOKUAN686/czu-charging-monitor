@@ -12,8 +12,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制生产运行主文件
+# 复制生产运行主文件与前端文件
 COPY app_cloud_run.py .
+COPY index.html .
 
 # 暴露 Cloud Run 标准端口
 EXPOSE 8080

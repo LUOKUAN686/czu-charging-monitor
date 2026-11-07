@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>微云日月充 · 用户授权登录预览</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(145deg, #EBF1F8 0%, #E2EAF4 45%, #F4F7FB 100%);
+            --glass-bg: rgba(255, 255, 255, 0.72);
+            --glass-card: rgba(255, 255, 255, 0.82);
+            --glass-border: rgba(255, 255, 255, 0.95);
+            --glass-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+            
+            --text-primary: #1C1C1E;
+            --text-secondary: #636366;
+            --text-tertiary: #8E8E93;
+
+            --apple-green: #34C759;
+            --apple-green-light: rgba(52, 199, 89, 0.14);
+            --apple-blue: #007AFF;
+            --apple-blue-hover: #0062CC;
+            --apple-blue-glow: rgba(0, 122, 255, 0.28);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 16px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 苹果弥散氛围光晕 */
+        .ambient-glow-1 {
+            position: fixed;
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(52, 199, 89, 0.22) 0%, rgba(0, 122, 255, 0.15) 50%, transparent 70%);
+            top: -80px;
+            right: -80px;
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(50px);
+            animation: pulseGlow 8s infinite alternate ease-in-out;
+        }
+
+        .ambient-glow-2 {
+            position: fixed;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(0, 122, 255, 0.18) 0%, rgba(52, 199, 89, 0.10) 60%, transparent 75%);
+            bottom: -60px;
+            left: -60px;
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(45px);
+            animation: pulseGlow 10s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 410px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 顶部开发者药丸徽章 */
+        .creator-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+        .creator-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            color: var(--apple-blue);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.08);
+        }
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--apple-blue);
+            box-shadow: 0 0 6px var(--apple-blue);
+        }
+
+        /* 核心毛玻璃卡片 */
+        .glass-card {
+            background: var(--glass-card);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 32px 26px 28px;
+            box-shadow: var(--glass-shadow);
+            position: relative;
+        }
+
+        /* 品牌图标与标题 */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .brand-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 12px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #34C759 0%, #28A745 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(52, 199, 89, 0.35);
+        }
+        .brand-icon svg {
+            width: 34px;
+            height: 34px;
+            fill: white;
+        }
+        .brand-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .brand-sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* 表单区域 */
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .input-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 7px;
+            padding-left: 4px;
+        }
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            font-size: 16px;
+            color: var(--text-tertiary);
+            pointer-events: none;
+        }
+        .custom-input {
+            width: 100%;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1.5px solid rgba(229, 229, 234, 0.9);
+            border-radius: 16px;
+            padding: 0 16px 0 42px;
+            font-size: 15px;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .custom-input:focus {
+            background: #FFFFFF;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 4px var(--apple-blue-glow);
+        }
+        .custom-input::placeholder {
+            color: #C7C7CC;
+            font-size: 13.5px;
+        }
+
+        /* 记住登录状态开关 */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 0 4px;
+        }
+        .remember-wrap {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .custom-checkbox {
+            width: 17px;
+            height: 17px;
+            accent-color: var(--apple-blue);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .help-link {
+            font-size: 13px;
+            color: var(--apple-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* 登录按钮 */
+        .login-btn {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #007AFF 0%, #0056D2 100%);
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .login-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 14px rgba(0, 122, 255, 0.25);
+        }
+
+        /* 状态提示信息框 */
+        .msg-toast {
+            margin-top: 14px;
+            font-size: 13px;
+            text-align: center;
+            min-height: 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        /* 底部安全与版权 */
+        .footer-note {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 11.5px;
+            color: var(--text-tertiary);
+            line-height: 1.6;
+        }
+        .footer-note strong {
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div class="login-container">
+        <!-- 开发者身份标识 -->
+        <div class="creator-bar">
+            <div class="creator-badge">
+                <span class="badge-dot"></span>
+                <span>常州大学西太湖校区 · 开发者 日月潭</span>
+            </div>
+        </div>
+
+        <!-- 苹果毛玻璃卡片 -->
+        <div class="glass-card">
+            <!-- 品牌徽标 -->
+            <div class="brand-header">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 100 100">
+                        <path d="M55 18L28 54h18l-6 28 27-36H49l6-28z" fill="white"/>
+                    </svg>
+                </div>
+                <h1 class="brand-title">微云日月充</h1>
+                <p class="brand-sub">智能充电监控系统 · 用户授权登录</p>
+            </div>
+
+            <!-- 登录表单 -->
+            <form onsubmit="handleDemoLogin(event)">
+                <div class="form-group">
+                    <label class="input-label">授权邮箱</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" id="email" class="custom-input" placeholder="输入您的邮箱 (如 @czu.edu.cn 或 QQ)" value="test@czu.edu.cn" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="input-label">专属激活密钥</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔑</span>
+                        <input type="text" id="passcode" class="custom-input" placeholder="输入开发者专属激活密钥" value="RYT-8888" required>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-wrap">
+                        <input type="checkbox" class="custom-checkbox" checked>
+                        <span>记住本次授权 (永久免密)</span>
+                    </label>
+                    <a href="javascript:void(0)" class="help-link" onclick="copyContact()">获取密钥</a>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <span>验证并进入监控系统</span>
+                    <span>→</span>
+                </button>
+
+                <div class="msg-toast" id="msgToast"></div>
+            </form>
+        </div>
+
+        <div class="footer-note">
+            基于端对端白名单授权保护 · 安全防线已就绪<br>
+            Designed & Developed by <strong>日月潭</strong>
+        </div>
+    </div>
+
+    <script>
+        function copyContact() {
+            alert("请联系开发者【日月潭】申请您的专属邮箱白名单与授权激活码！");
+        }
+
+        function handleDemoLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById("email").value.trim();
+            const passcode = document.getElementById("passcode").value.trim();
+            const btn = document.getElementById("loginBtn");
+            const toast = document.getElementById("msgToast");
+
+            btn.innerHTML = "<span>正在验证云端授权...</span>";
+            btn.style.opacity = "0.8";
+
+            setTimeout(() => {
+                if (passcode.toUpperCase() === "RYT-8888" || passcode === "666888") {
+                    btn.innerHTML = "<span>✓ 授权成功，欢迎使用！</span>";
+                    btn.style.background = "linear-gradient(135deg, #34C759 0%, #28A745 100%)";
+                    btn.style.boxShadow = "0 8px 24px rgba(52, 199, 89, 0.4)";
+                    toast.style.color = "var(--apple-green)";
+                    toast.innerText = "已通过白名单校验，正在为您开启实时充电大屏...";
+                    setTimeout(() => {
+                        alert("🎉 恭喜！样品验证完全成功！正式版验证后将直接平滑滑入主大屏！");
+                        btn.innerHTML = "<span>验证并进入监控系统</span><span>→</span>";
+                        btn.style.background = "linear-gradient(135deg, #007AFF 0%, #0056D2 100%)";
+                        btn.style.boxShadow = "0 8px 24px rgba(0, 122, 255, 0.35)";
+                        btn.style.opacity = "1";
+                    }, 800);
+                } else {
+                    btn.innerHTML = "<span>验证并进入监控系统</span><span>→</span>";
+                    btn.style.opacity = "1";
+                    toast.style.color = "#FF3B30";
+                    toast.innerText = "❌ 邮箱未授权或激活码错误，请联系开发者";
+                }
+            }, 600);
+        }
+    </script>
+</body>
+</html>
