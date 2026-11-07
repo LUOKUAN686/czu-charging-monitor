@@ -1,0 +1,14 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+*.log
+all_charging_trends.csv
+charging_occupancy_24h.png
+charging_weekly_heatmap.png
+*.bat
+app.zip
+test_*.py
+debug_*.py
