@@ -970,12 +970,6 @@
                     <span class="btn-text">验证并开启实时监控</span>
                     <i data-lucide="arrow-right" class="btn-icon-right" style="width: 18px; height: 18px;"></i>
                 </button>
-
-                <!-- 快捷演示凭证胶囊 -->
-                <div class="demo-chip-box" onclick="fillDemoAccount()">
-                    <i data-lucide="sparkles" style="width: 15px; height: 15px; color: #34D399;"></i>
-                    <span>点击一键填入<strong>【演示授权账号】</strong>试用</span>
-                </div>
             </form>
 
             <div class="login-footer">
@@ -1119,19 +1113,19 @@
 
     <script>
         // ==========================================
-        // 1. 认证配置与白名单管理 (路线 A)
+        // 1. 认证配置与云端鉴权中心 (路线 A · 云端版)
         // ==========================================
         const AUTH_STORAGE_KEY = "czu_charge_auth_user";
-        
-        // 授权白名单字典：邮箱 -> 激活密钥 (支持学生、测试和开发者账号)
-        const AUTHORIZED_USERS = {
-            "admin@czu.edu.cn": "888888",
-            "riyue@czu.edu.cn": "888888",
-            "student@czu.edu.cn": "123456",
-            "demo@czu.edu.cn": "888888"
-        };
-        // 通用备用激活码（允许任何 @czu.edu.cn 或合法邮箱配合统一激活密钥使用）
-        const UNIVERSAL_KEY = "888888";
+
+        // 生成或获取设备唯一指纹 (实现一号一机独占硬件级绑定)
+        function getOrCreateDeviceId() {
+            let devId = localStorage.getItem("czu_device_id");
+            if (!devId) {
+                devId = "dev_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now().toString(36);
+                localStorage.setItem("czu_device_id", devId);
+            }
+            return devId;
+        }
 
         // ==========================================
         // 2. 充电设备与微云充微信请求配置
@@ -1195,9 +1189,9 @@
         }
 
         // ==========================================
-        // 4. 登录验证交互与礼花庆祝 (路线 A)
+        // 4. 登录验证交互 (云端鉴权 + 单设备绑定)
         // ==========================================
-        function handleAuthLogin(e) {
+        async function handleAuthLogin(e) {
             e.preventDefault();
             const email = document.getElementById("email-input").value.trim().toLowerCase();
             const key = document.getElementById("key-input").value.trim();
@@ -1208,32 +1202,35 @@
             errBox.style.display = "none";
             btn.classList.add("loading");
 
-            setTimeout(() => {
-                let isValid = false;
-                if (AUTHORIZED_USERS[email] && AUTHORIZED_USERS[email] === key) {
-                    isValid = true;
-                } else if (key === UNIVERSAL_KEY && email.includes("@")) {
-                    // 支持通用授权密钥验证
-                    isValid = true;
-                }
+            const deviceId = getOrCreateDeviceId();
 
-                if (isValid) {
-                    // 1. 触发粒子物理喷射
+            try {
+                const resp = await fetch("/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, key, device_id: deviceId })
+                });
+                const res = await resp.json();
+
+                if (res.ok) {
                     triggerSuccessConfetti();
-                    // 2. 存储登录状态
                     localStorage.setItem(AUTH_STORAGE_KEY, email);
-                    // 3. 平滑切换
+                    if (res.token) localStorage.setItem("czu_user_token", res.token);
                     setTimeout(() => {
                         btn.classList.remove("loading");
                         showDashboard(email);
                     }, 800);
                 } else {
                     btn.classList.remove("loading");
-                    errText.innerText = "授权未通过：邮箱未在白名单或激活码错误";
+                    errText.innerText = res.message || "授权未通过：邮箱或激活密匙不正确";
                     errBox.style.display = "flex";
                     if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
                 }
-            }, 600);
+            } catch (err) {
+                btn.classList.remove("loading");
+                errText.innerText = "云端鉴权服务连接失败，请检查网络连接";
+                errBox.style.display = "flex";
+            }
         }
 
         function triggerSuccessConfetti() {
@@ -1245,14 +1242,6 @@
                     colors: ['#10B981', '#06B6D4', '#3B82F6', '#FFFFFF']
                 });
             }
-        }
-
-        function fillDemoAccount() {
-            document.getElementById("email-input").value = "student@czu.edu.cn";
-            document.getElementById("key-input").value = "123456";
-            toggleClearBtn();
-            document.getElementById("error-msg").style.display = "none";
-            if (navigator.vibrate) navigator.vibrate(20);
         }
 
         function toggleClearBtn() {

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>微云日月充 · 管理员控制台</title>
+    
+    <!-- 引入统一字体与图标 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg-canvas: #090D16;
+            --brand-primary: #10B981;
+            --brand-primary-glow: rgba(16, 185, 129, 0.45);
+            --brand-cyan: #06B6D4;
+            --brand-blue: #3B82F6;
+            --brand-danger: #EF4444;
+            
+            --glass-card: rgba(15, 23, 42, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --card-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --text-dim: #64748B;
+
+            --input-bg: rgba(2, 6, 23, 0.6);
+            --input-border: rgba(255, 255, 255, 0.14);
+
+            --radius-card: 26px;
+            --radius-btn: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans SC', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            min-height: 100vh;
+            color: var(--text-main);
+            padding: calc(env(safe-area-inset-top, 20px) + 12px) 16px calc(env(safe-area-inset-bottom, 20px) + 30px);
+            max-width: 540px;
+            margin: 0 auto;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 32px 32px;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .ambient-aurora {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(6, 182, 212, 0.15) 45%, transparent 70%);
+            top: -150px;
+            right: -120px;
+            filter: blur(90px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .main-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 顶部导航 */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #10B981;
+        }
+
+        .nav-title h1 {
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .nav-title span {
+            font-size: 11px;
+            color: #38BDF8;
+            font-weight: 600;
+        }
+
+        .exit-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-muted);
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 管理员锁屏卡片 */
+        #lock-screen {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 32px 22px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            margin-top: 30px;
+        }
+
+        .lock-icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #34D399;
+        }
+
+        .lock-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .lock-sub {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .input-box {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-btn);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .input-box input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 14px 0;
+            color: var(--text-main);
+            font-size: 14.5px;
+        }
+
+        .btn-action {
+            width: 100%;
+            background: linear-gradient(135deg, #10B981, #059669);
+            border: none;
+            padding: 14px;
+            border-radius: var(--radius-btn);
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+        }
+
+        /* 后台主控制面板 */
+        #admin-panel {
+            display: none;
+        }
+
+        /* 统计卡片条 */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .stat-label {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-num {
+            font-size: 26px;
+            font-weight: 800;
+            color: #34D399;
+        }
+
+        /* 添加用户表单卡片 */
+        .panel-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-header-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row {
+            margin-bottom: 12px;
+        }
+
+        .form-row label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .key-input-wrap {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-gen-key {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #38BDF8;
+            border-radius: var(--radius-btn);
+            padding: 0 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* 授权用户列表 */
+        .user-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 14px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .user-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .user-email {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #FFFFFF;
+            word-break: break-all;
+        }
+
+        .user-memo {
+            font-size: 11px;
+            color: #94A3B8;
+            margin-top: 2px;
+        }
+
+        .user-key-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: #34D399;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-family: monospace;
+            font-weight: 700;
+        }
+
+        .device-badge-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+            font-size: 11.5px;
+            margin-top: 8px;
+        }
+
+        .device-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dot-bound {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 6px #10B981;
+        }
+
+        .dot-unbound {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #64748B;
+        }
+
+        .btn-unbind {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #F87171;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-del {
+            background: none;
+            border: none;
+            color: #64748B;
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 6px;
+        }
+        .btn-del:hover {
+            color: #EF4444;
+        }
+
+        /* GitHub 同步状态栏 */
+        .sync-card {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="ambient-aurora"></div>
+
+    <div class="main-wrapper">
+        <header class="admin-nav">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i data-lucide="shield-check" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div class="nav-title">
+                    <h1>微云日月充 · 鉴权中心</h1>
+                    <span>常州大学西太湖校区 · 日月潭</span>
+                </div>
+            </div>
+            <button id="nav-logout-btn" class="exit-btn" style="display: none;" onclick="handleAdminLogout()">
+                <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
+                <span>退出管理</span>
+            </button>
+        </header>
+
+        <!-- 1. 管理员总密码锁屏卡片 -->
+        <div id="lock-screen">
+            <div class="lock-icon-box">
+                <i data-lucide="lock" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h2 class="lock-title">管理员身份锁</h2>
+            <div class="lock-sub">请输入超级管理员总密码（MASTER KEY）解锁管理权</div>
+            <form onsubmit="handleAdminLogin(event)">
+                <div class="input-box">
+                    <input type="password" id="admin-key-input" placeholder="请输入管理员总密码" required autocomplete="current-password">
+                </div>
+                <button type="submit" id="btn-unlock" class="btn-action">
+                    <i data-lucide="key" style="width: 18px; height: 18px;"></i>
+                    <span>验证并进入控制台</span>
+                </button>
+            </form>
+            <div id="lock-err-msg" style="color: #F87171; font-size: 12px; margin-top: 12px; display: none;">总密码验证失败，请重试</div>
+        </div>
+
+        <!-- 2. 后台主控制面板 -->
+        <div id="admin-panel">
+            <!-- 统计指标 -->
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i data-lucide="users" style="width: 14px; height: 14px; color: #38BDF8;"></i>
+                        <span>已授权邮箱数</span>
+                    </div>
+                    <div id="stat-total" class="stat-num">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i data-lucide="smartphone" style="width: 14px; height: 14px; color: #10B981;"></i>
+                        <span>已独占绑定设备</span>
+                    </div>
+                    <div id="stat-bound" class="stat-num">0</div>
+                </div>
+            </div>
+
+            <!-- GitHub 状态同步横幅 -->
+            <div class="sync-card">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="git-branch" style="width: 16px; height: 16px; color: #60A5FA;"></i>
+                    <span id="sync-status-txt">已与 GitHub 仓库加密同步</span>
+                </div>
+                <button class="exit-btn" style="padding: 4px 8px; font-size: 11px;" onclick="loadUsers()">
+                    <i data-lucide="rotate-cw" style="width: 12px; height: 12px;"></i>
+                    <span>刷新</span>
+                </button>
+            </div>
+
+            <!-- ➕ 添加授权用户表单 -->
+            <div class="panel-card">
+                <div class="card-header-line">
+                    <div class="card-title">
+                        <i data-lucide="user-plus" style="width: 18px; height: 18px; color: #34D399;"></i>
+                        <span>新增人员授权 (一人一密)</span>
+                    </div>
+                </div>
+                <form onsubmit="handleAddUser(event)">
+                    <div class="form-row">
+                        <label>使用者邮箱 (支持校园/QQ/网易等任意邮箱)</label>
+                        <div class="input-box" style="margin-bottom: 0;">
+                            <input type="email" id="new-email" placeholder="例如：student@czu.edu.cn" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label>专属通行密钥 (6-16位独占密匙)</label>
+                        <div class="key-input-wrap">
+                            <div class="input-box" style="flex: 1; margin-bottom: 0;">
+                                <input type="text" id="new-key" placeholder="例如：987654" required>
+                            </div>
+                            <button type="button" class="btn-gen-key" onclick="generateRandomKey()">随机生成</button>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label>人员备注说明 (可选，便于辨识)</label>
+                        <div class="input-box" style="margin-bottom: 16px;">
+                            <input type="text" id="new-memo" placeholder="例如：22级智电张同学">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-add-user" class="btn-action">
+                        <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+                        <span>开通授权并同步云端</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- 📋 白名单用户管理列表 -->
+            <div class="panel-card">
+                <div class="card-header-line">
+                    <div class="card-title">
+                        <i data-lucide="list-filter" style="width: 18px; height: 18px; color: #38BDF8;"></i>
+                        <span>已授权白名单人员与绑定状态</span>
+                    </div>
+                </div>
+                <div id="users-container">
+                    <!-- 动态渲染每个用户卡片 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAdminToken = localStorage.getItem("czu_admin_token") || "";
+
+        function initAdmin() {
+            lucide.createIcons();
+            if (currentAdminToken) {
+                // 尝试用已有 token 加载
+                loadUsers();
+            } else {
+                showLock();
+            }
+        }
+
+        function showLock() {
+            document.getElementById("lock-screen").style.display = "block";
+            document.getElementById("admin-panel").style.display = "none";
+            document.getElementById("nav-logout-btn").style.display = "none";
+            lucide.createIcons();
+        }
+
+        function showPanel() {
+            document.getElementById("lock-screen").style.display = "none";
+            document.getElementById("admin-panel").style.display = "block";
+            document.getElementById("nav-logout-btn").style.display = "flex";
+            lucide.createIcons();
+        }
+
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            const key = document.getElementById("admin-key-input").value.trim();
+            const errEl = document.getElementById("lock-err-msg");
+            errEl.style.display = "none";
+
+            try {
+                const resp = await fetch("/api/admin/verify", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ "admin_key": key })
+                });
+                const res = await resp.json();
+                if (res.ok) {
+                    currentAdminToken = res.token;
+                    localStorage.setItem("czu_admin_token", currentAdminToken);
+                    showPanel();
+                    loadUsers();
+                    if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+                } else {
+                    errEl.innerText = res.message || "管理员密码错误";
+                    errEl.style.display = "block";
+                }
+            } catch (err) {
+                errEl.innerText = "网络连接失败，请检查服务状态";
+                errEl.style.display = "block";
+            }
+        }
+
+        function handleAdminLogout() {
+            if (confirm("确定退出管理员控制台吗？")) {
+                currentAdminToken = "";
+                localStorage.removeItem("czu_admin_token");
+                showLock();
+            }
+        }
+
+        function generateRandomKey() {
+            const num = Math.floor(100000 + Math.random() * 900000);
+            document.getElementById("new-key").value = num.toString();
+        }
+
+        async function loadUsers() {
+            try {
+                const resp = await fetch("/api/admin/users", {
+                    headers: { "Authorization": `Bearer ${currentAdminToken}` }
+                });
+                if (resp.status === 401 || resp.status === 403) {
+                    currentAdminToken = "";
+                    localStorage.removeItem("czu_admin_token");
+                    showLock();
+                    return;
+                }
+                const data = await resp.json();
+                renderUserList(data.users || []);
+                showPanel();
+            } catch (err) {
+                console.error("加载白名单失败", err);
+            }
+        }
+
+        function renderUserList(users) {
+            const container = document.getElementById("users-container");
+            document.getElementById("stat-total").innerText = users.length;
+            const boundCount = users.filter(u => !!u.bound_device).length;
+            document.getElementById("stat-bound").innerText = boundCount;
+
+            if (users.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 24px 0; color: var(--text-dim); font-size: 13px;">暂无已授权人员，请在上方开通新用户</div>`;
+                return;
+            }
+
+            container.innerHTML = "";
+            users.forEach(u => {
+                const isBound = !!u.bound_device;
+                const card = document.createElement("div");
+                card.className = "user-item";
+                card.innerHTML = `
+                    <div class="user-top">
+                        <div>
+                            <div class="user-email">${u.email}</div>
+                            <div class="user-memo">${u.memo ? `📝 ${u.memo} · ` : ''}添加于 ${u.created_at || '近期'}</div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <span class="user-key-badge">
+                                <i data-lucide="key" style="width: 12px; height: 12px;"></i>
+                                <span>${u.key}</span>
+                            </span>
+                            <button class="btn-del" title="彻底删除授权" onclick="handleDeleteUser('${u.email}')">
+                                <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="device-badge-row">
+                        <div class="device-status">
+                            <span class="${isBound ? 'dot-bound' : 'dot-unbound'}"></span>
+                            <span style="color: ${isBound ? '#34D399' : '#94A3B8'};">
+                                ${isBound ? `已锁定绑定设备 (${u.bound_device.slice(0, 10)}...)` : '待用户首次登录绑定'}
+                            </span>
+                        </div>
+                        ${isBound ? `
+                            <button class="btn-unbind" onclick="handleUnbindDevice('${u.email}')">
+                                🔓 解绑设备
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        async function handleAddUser(e) {
+            e.preventDefault();
+            const email = document.getElementById("new-email").value.trim().toLowerCase();
+            const key = document.getElementById("new-key").value.trim();
+            const memo = document.getElementById("new-memo").value.trim();
+
+            const resp = await fetch("/api/admin/users/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${currentAdminToken}`
+                },
+                body: JSON.stringify({ email, key, memo })
+            });
+            const res = await resp.json();
+            if (res.ok) {
+                alert(`已成功为【${email}】开通授权！`);
+                document.getElementById("new-email").value = "";
+                document.getElementById("new-key").value = "";
+                document.getElementById("new-memo").value = "";
+                loadUsers();
+            } else {
+                alert(res.message || "开通失败");
+            }
+        }
+
+        async function handleUnbindDevice(email) {
+            if (!confirm(`确定要为【${email}】解除设备绑定吗？\n解绑后，该账号允许在任何新设备上重新绑定使用。`)) return;
+            const resp = await fetch("/api/admin/users/unbind", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${currentAdminToken}`
+                },
+                body: JSON.stringify({ email })
+            });
+            const res = await resp.json();
+            if (res.ok) {
+                loadUsers();
+            } else {
+                alert(res.message || "解绑失败");
+            }
+        }
+
+        async function handleDeleteUser(email) {
+            if (!confirm(`警告：确定要彻底注销【${email}】的访问权限吗？`)) return;
+            const resp = await fetch("/api/admin/users/delete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${currentAdminToken}`
+                },
+                body: JSON.stringify({ email })
+            });
+            const res = await resp.json();
+            if (res.ok) {
+                loadUsers();
+            } else {
+                alert(res.message || "删除失败");
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", initAdmin);
+    </script>
+</body>
+</html>
